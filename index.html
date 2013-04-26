@@ -15,54 +15,15 @@
 
   <script type="text/javascript">
 
-    var app = ({
-      
-      init: function(data){
-        var views = [], 
-          body = $(document.body),
-          wrapper = $('#wrapper'),
-          maxHeight = body.height(),
-          maxWidth  = body.width(),
-          width  = data.boundary.width,
-          height = data.boundary.height,
-          ratio =  height / width, 
-          d;
+    var app = (function(){
 
-        for ( d in data.pages ){
-          views.push(new UIView({
-            src: data.pages[d].src,
-            thumb: data.pages[d].thumb
-          }));
-        }
+      var 
 
-        this.uiSwipeView = new UISwipeViewLight(wrapper.get(0), views , {
-          height: maxWidth * ratio,
-          width: maxWidth,
-          onChangeView: app.changeView,
-          onBeforeSlide: app.beforeSlide
-        });  
-
-        this.uiSwipeView.show(this.uiSwipeView.getView(0));
-        app.load.call(this.uiSwipeView);
-
-        this.scroller = new iScroll(wrapper.get(0), { 
-          zoom: true,
-          zoomMin: 1,
-          zoomMax: 5,
-          bounce: false,
-          bounceLock: true,
-          doubleTapZoom: 3,
-          hScrollbar: false,
-          vScrollbar: false,
-          wheelAction: 'zoom'
-        });
+      _changeView = function(){
+        _showView.call(this);
       },
 
-      changeView: function(){
-        app.showView.call(this);
-      },
-
-      showView: function(){ 
+      _showView = function(){ 
         var nextCacheIndex = this.index + 1,
             previousCacheIndex = this.index - 1, 
             views;
@@ -85,15 +46,61 @@
         });
       },
 
-      beforeSlide: function(){
+      _beforeSlide = function(){
         this.getView().unload();
       },
       
-      load: function(){
+      _load = function(){
         this.getView().setImage(true);
-      }
+      };
+      
+      return {
+
+        init: function(data){
+          var views = [], 
+            body = $(document.body),
+            wrapper = $('#wrapper'),
+            maxHeight = body.height(),
+            maxWidth  = body.width(),
+            width  = data.boundary.width,
+            height = data.boundary.height,
+            ratio =  height / width, 
+            d;
+
+          for ( d in data.pages ){
+            views.push(new UIView({
+              src: data.pages[d].src,
+              thumb: data.pages[d].thumb
+            }));
+          }
+
+          this.uiSwipeView = new UISwipeViewLight(wrapper.get(0), views , {
+            height: maxWidth * ratio,
+            width: maxWidth,
+            onChangeView: _changeView,
+            onBeforeSlide: _beforeSlide
+          });  
+
+          this.uiSwipeView.show(this.uiSwipeView.getView(0));
+          _load.call(this.uiSwipeView);
+
+          this.scroller = new iScroll(wrapper.get(0), { 
+            zoom: true,
+            zoomMin: 1,
+            zoomMax: 5,
+            bounce: false,
+            bounceLock: true,
+            doubleTapZoom: 3,
+            hScrollbar: false,
+            vScrollbar: false,
+            wheelAction: 'zoom'
+          });
+
+          return this;
+        }
+      };
     
-    });
+    }());
   
 
     // Document Ready
