@@ -96,17 +96,28 @@
             wheelAction: 'zoom'
           });
 
+           $(window).on('resize orientationchange', function(){
+              var maxWidth  = body.width();
+              app.uiSwipeView.setOptions({
+                height: maxWidth * ratio,
+                width: maxWidth,
+              })
+              app.uiSwipeView.refresh();
+            });
+
           return this;
         }
       };
     
     }());
   
-
+      
     // Document Ready
 
     $(function(){
+      
       app.init(data);
+
     });
 
   </script>

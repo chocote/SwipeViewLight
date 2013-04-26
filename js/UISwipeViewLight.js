@@ -112,6 +112,10 @@ var UISwipeViewLight = (function (window, doc) {
       var i;
       for (i in options) this.options[i] = options[i];
     },
+    refresh: function(){
+      this.el.style.height = this.options.height + 'px';
+      this.el.style.width = this.options.width + 'px';
+    },
     _bind: function (type, el, bubble) {
       (el || this.el).addEventListener(type, this, !! bubble);
     },
