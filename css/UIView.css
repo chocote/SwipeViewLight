@@ -1,0 +1,5 @@
+  /* UIView */
+
+  .view { position: absolute; width: 100%; }
+  .view-area {height: 100%; width: 100%; position: absolute; z-index: 1; top: 0; left: 0;}
+  .view-image { width: 100%; display: block; }

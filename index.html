@@ -1,0 +1,96 @@
+<html>
+<head>
+
+  <title>Swipe View Light</title>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  
+  <link rel="stylesheet" media="screen" href="css/UIView.css" type="text/css" />
+
+  <script type="text/javascript" src="js/data.js"></script>
+  <script type="text/javascript" src="js/jquery.js"></script>
+  
+  <script type="text/javascript" src="js/UIView.js"></script>
+  <script type="text/javascript" src="js/SwipeViewLight.js"></script>
+
+
+
+  <script type="text/javascript">
+
+
+    $(function(){
+
+      var views = [],
+          wrapper = $('body'),
+          maxHeight = wrapper.height(),
+          maxWidth  = wrapper.width(),
+          width  = data.boundary.width,
+          height = data.boundary.height,
+          scale = (maxHeight / maxWidth) > (height / width) ? maxWidth/width : maxHeight / height;
+
+      for ( d in data.pages ){
+        views.push(new UIView({
+          src: data.pages[d].src,
+          thumb: data.pages[d].thumb
+        }));
+      }
+
+
+      var events = ({
+        
+        changeView: function(){
+          events.showView.call(this);
+        },
+
+        showView: function(){ 
+          var nextCacheIndex = this.index + 1,
+              previousCacheIndex = this.index - 1, 
+              views;
+        
+          if (nextCacheIndex > this.views.length - 1) {
+            nextCacheIndex = 0;
+          }
+          if (previousCacheIndex < 0) {
+            previousCacheIndex = this.views.length - 1;
+          }
+
+          var views = this.getViews([ previousCacheIndex, this.index, nextCacheIndex]);
+
+          views[1].show(function(){
+            this.setImage(true);
+            views[0].render();
+            views[2].render();
+            views[0].preload();
+            views[2].preload();
+          });
+        },
+
+        beforeSlide: function(){
+          this.getView().unload();
+        },
+        
+        load: function(){
+          this.getView().setImage(true);
+        }
+      });
+
+      width *= scale;
+      height *= scale;
+
+      uiSwipeView = new UISwipeViewLight(wrapper.get(0), views , {
+        height: height,
+        width: width,
+        onChangeView: events.changeView,
+        onBeforeSlide: events.beforeSlide
+      });  
+
+      uiSwipeView.show(uiSwipeView.getView(0));
+      events.load.call(uiSwipeView);
+
+    });
+
+  </script>
+
+</head>
+<body style="margin:0; padding:0;">
+</body>
+</html>
