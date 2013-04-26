@@ -88,7 +88,7 @@ var UISwipeViewLight = (function (window, doc) {
       this.lastIndex = this.index;
       this.enabled = true;
       this.isSliding = false;
-      this.swipeThreshold = 50;
+      this.swipeThreshold = 100;
       this.swipeTimeThreshold = 250;
       this.startPoint = {
         x: 0,

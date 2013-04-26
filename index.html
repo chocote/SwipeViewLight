@@ -15,76 +15,64 @@
 
   <script type="text/javascript">
 
-    var app = (function(){
-
-      var 
-
-      _changeView = function(){
-        _showView.call(this);
-      },
-
-      _showView = function(){ 
-        var nextCacheIndex = this.index + 1,
-            previousCacheIndex = this.index - 1, 
-            views;
-      
-        if (nextCacheIndex > this.views.length - 1) {
-          nextCacheIndex = 0;
-        }
-        if (previousCacheIndex < 0) {
-          previousCacheIndex = this.views.length - 1;
-        }
-
-        var views = this.getViews([ previousCacheIndex, this.index, nextCacheIndex]);
-
-        views[1].show(function(){
-          this.setImage(true);
-          views[0].render();
-          views[2].render();
-          views[0].preload();
-          views[2].preload();
-        });
-      },
-
-      _beforeSlide = function(){
-        this.getView().unload();
-      },
-      
-      _load = function(){
-        this.getView().setImage(true);
-      };
-      
-      return {
-
-        init: function(data){
-          var views = [], 
-            body = $(document.body),
-            wrapper = $('#wrapper'),
-            maxHeight = body.height(),
-            maxWidth  = body.width(),
-            width  = data.boundary.width,
-            height = data.boundary.height,
-            ratio =  height / width, 
-            d;
-
-          for ( d in data.pages ){
+    var app = (function () {
+      var views = [],
+        win,
+        body,
+        wrapper,
+        target,
+        maxHeight,
+        maxWidth,
+        width,
+        height,
+        ratio,
+        scroller,
+        uiSwipeView,
+        _init = function (data) {
+          var d;
+          views = [];
+          win = $(window);
+          body = $(document.body);
+          wrapper = $('#wrapper');
+          target = $('#target');
+          maxHeight = body.height();
+          maxWidth = body.width();
+          width = data.boundary.width;
+          height = data.boundary.height;
+          ratio = height / width;
+          for (d in data.pages) {
             views.push(new UIView({
               src: data.pages[d].src,
               thumb: data.pages[d].thumb
             }));
           }
-
-          this.uiSwipeView = new UISwipeViewLight(wrapper.get(0), views , {
+          _setUISwipeView();
+          _setScroll();
+          win.on('resize orientationchange', function () {
+            var maxWidth = body.width();
+            uiSwipeView.setOptions({
+              height: maxWidth * ratio,
+              width: maxWidth
+            })
+            uiSwipeView.refresh();
+          });
+          return {
+            uiSwipeView: uiSwipeView,
+            scroller: scroller
+          }
+        },
+        _setUISwipeView = function () {
+          uiSwipeView = new UISwipeViewLight(target.get(0), views, {
             height: maxWidth * ratio,
             width: maxWidth,
             onChangeView: _changeView,
             onBeforeSlide: _beforeSlide
-          });  
-
-          this.uiSwipeView.show(this.uiSwipeView.getView(0));
-          _load.call(this.uiSwipeView);
-
-          this.scroller = new iScroll(wrapper.get(0), { 
+          });
+          uiSwipeView.show(uiSwipeView.getView(0));
+          _load.call(uiSwipeView);
+        },
+        _setScroll = function () {
+          scroller = new iScroll(wrapper.get(0), {
             zoom: true,
             zoomMin: 1,
             zoomMax: 5,
@@ -93,31 +81,55 @@
             doubleTapZoom: 3,
             hScrollbar: false,
             vScrollbar: false,
-            wheelAction: 'zoom'
+            wheelAction: 'zoom',
+            onZoomEnd: function () {
+              if (this.scale > 1) {
+                uiSwipeView.disable();
+              } else {
+                uiSwipeView.enable();
+              }
+            }
           });
-
-           $(window).on('resize orientationchange', function(){
-              var maxWidth  = body.width();
-              app.uiSwipeView.setOptions({
-                height: maxWidth * ratio,
-                width: maxWidth
-              })
-              app.uiSwipeView.refresh();
-            });
-
-          return this;
-        }
+        },
+        _changeView = function () {
+          _showView.call(this);
+        },
+        _showView = function () {
+          var nextCacheIndex = this.index + 1,
+            previousCacheIndex = this.index - 1,
+            views;
+          if (nextCacheIndex > this.views.length - 1) {
+            nextCacheIndex = 0;
+          }
+          if (previousCacheIndex < 0) {
+            previousCacheIndex = this.views.length - 1;
+          }
+          var views = this.getViews([previousCacheIndex, this.index, nextCacheIndex]);
+          // _setScroll();
+          views[1].show(function () {
+            this.setImage(true);
+            views[0].render();
+            views[2].render();
+            views[0].preload();
+            views[2].preload();
+          });
+        },
+        _beforeSlide = function () {
+          //scroller.destroy();
+          this.getView().unload();
+        },
+        _load = function () {
+          this.getView().setImage(true);
+        };
+      return {
+        init: _init
       };
-    
     }());
-  
-      
-    // Document Ready
 
-    $(function(){
-      
-      app.init(data);
 
+     // Document Ready
+    $(function () {
+      api = app.init(data);
     });
 
   </script>
@@ -125,6 +137,9 @@
 </head>
 <body>
   <div id="wrapper">
+    <div id="target">
+
+    </div>
   </div>
 </body>
 </html>
