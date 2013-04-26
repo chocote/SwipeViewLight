@@ -10,86 +10,42 @@
   <script type="text/javascript" src="js/jquery.js"></script>
   
   <script type="text/javascript" src="js/UIView.js"></script>
-  <script type="text/javascript" src="js/SwipeViewLight.js"></script>
+  <script type="text/javascript" src="js/UISwipeViewLight.js"></script>
   <script type="text/javascript" src="js/iscroll.js"></script>
-
-
 
   <script type="text/javascript">
 
-
-    $(function(){
-
-      var views = [],
-          wrapper = $('body'),
-          maxHeight = wrapper.height(),
-          maxWidth  = wrapper.width(),
+    var app = ({
+      
+      init: function(data){
+        var views = [], 
+          body = $(document.body),
+          wrapper = $('#wrapper'),
+          maxHeight = body.height(),
+          maxWidth  = body.width(),
           width  = data.boundary.width,
           height = data.boundary.height,
-          ratio =  height / width;
+          ratio =  height / width, 
+          d;
 
-      for ( d in data.pages ){
-        views.push(new UIView({
-          src: data.pages[d].src,
-          thumb: data.pages[d].thumb
-        }));
-      }
-
-
-      var events = ({
-        
-        changeView: function(){
-          events.showView.call(this);
-        },
-
-        showView: function(){ 
-          var nextCacheIndex = this.index + 1,
-              previousCacheIndex = this.index - 1, 
-              views;
-        
-          if (nextCacheIndex > this.views.length - 1) {
-            nextCacheIndex = 0;
-          }
-          if (previousCacheIndex < 0) {
-            previousCacheIndex = this.views.length - 1;
-          }
-
-          var views = this.getViews([ previousCacheIndex, this.index, nextCacheIndex]);
-
-          views[1].show(function(){
-            this.setImage(true);
-            views[0].render();
-            views[2].render();
-            views[0].preload();
-            views[2].preload();
-          });
-        },
-
-        beforeSlide: function(){
-          this.getView().unload();
-        },
-        
-        load: function(){
-          this.getView().setImage(true);
+        for ( d in data.pages ){
+          views.push(new UIView({
+            src: data.pages[d].src,
+            thumb: data.pages[d].thumb
+          }));
         }
-      });
 
-         
-      
-      width =  maxWidth * 1;
-      height = maxHeight * 1;
+        this.uiSwipeView = new UISwipeViewLight(wrapper.get(0), views , {
+          height: maxWidth * ratio,
+          width: maxWidth,
+          onChangeView: app.changeView,
+          onBeforeSlide: app.beforeSlide
+        });  
 
-      uiSwipeView = new UISwipeViewLight($("#wrapper").get(0), views , {
-        height: width * ratio,
-        width: width,
-        onChangeView: events.changeView,
-        onBeforeSlide: events.beforeSlide
-      });  
+        this.uiSwipeView.show(this.uiSwipeView.getView(0));
+        app.load.call(this.uiSwipeView);
 
-      uiSwipeView.show(uiSwipeView.getView(0));
-      events.load.call(uiSwipeView);
-
-      new iScroll($('#wrapper').get(0), { 
+        this.scroller = new iScroll(wrapper.get(0), { 
           zoom: true,
           zoomMin: 1,
           zoomMax: 5,
@@ -99,8 +55,51 @@
           hScrollbar: false,
           vScrollbar: false,
           wheelAction: 'zoom'
-      });
+        });
+      },
 
+      changeView: function(){
+        app.showView.call(this);
+      },
+
+      showView: function(){ 
+        var nextCacheIndex = this.index + 1,
+            previousCacheIndex = this.index - 1, 
+            views;
+      
+        if (nextCacheIndex > this.views.length - 1) {
+          nextCacheIndex = 0;
+        }
+        if (previousCacheIndex < 0) {
+          previousCacheIndex = this.views.length - 1;
+        }
+
+        var views = this.getViews([ previousCacheIndex, this.index, nextCacheIndex]);
+
+        views[1].show(function(){
+          this.setImage(true);
+          views[0].render();
+          views[2].render();
+          views[0].preload();
+          views[2].preload();
+        });
+      },
+
+      beforeSlide: function(){
+        this.getView().unload();
+      },
+      
+      load: function(){
+        this.getView().setImage(true);
+      }
+    
+    });
+  
+
+    // Document Ready
+
+    $(function(){
+      app.init(data);
     });
 
   </script>
