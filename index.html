@@ -11,6 +11,7 @@
   
   <script type="text/javascript" src="js/UIView.js"></script>
   <script type="text/javascript" src="js/SwipeViewLight.js"></script>
+  <script type="text/javascript" src="js/iscroll.js"></script>
 
 
 
@@ -25,7 +26,7 @@
           maxWidth  = wrapper.width(),
           width  = data.boundary.width,
           height = data.boundary.height,
-          scale = (maxHeight / maxWidth) > (height / width) ? maxWidth/width : maxHeight / height;
+          ratio =  height / width;
 
       for ( d in data.pages ){
         views.push(new UIView({
@@ -73,11 +74,13 @@
         }
       });
 
-      width *= scale;
-      height *= scale;
+         
+      
+      width =  maxWidth * 1;
+      height = maxHeight * 1;
 
-      uiSwipeView = new UISwipeViewLight(wrapper.get(0), views , {
-        height: height,
+      uiSwipeView = new UISwipeViewLight($("#wrapper").get(0), views , {
+        height: width * ratio,
         width: width,
         onChangeView: events.changeView,
         onBeforeSlide: events.beforeSlide
@@ -86,11 +89,25 @@
       uiSwipeView.show(uiSwipeView.getView(0));
       events.load.call(uiSwipeView);
 
+      new iScroll($('#wrapper').get(0), { 
+          zoom: true,
+          zoomMin: 1,
+          zoomMax: 5,
+          bounce: false,
+          bounceLock: true,
+          doubleTapZoom: 3,
+          hScrollbar: false,
+          vScrollbar: false,
+          wheelAction: 'zoom'
+      });
+
     });
 
   </script>
 
 </head>
-<body style="margin:0; padding:0;">
+<body>
+  <div id="wrapper">
+  </div>
 </body>
 </html>

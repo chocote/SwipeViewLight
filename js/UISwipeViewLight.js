@@ -69,15 +69,14 @@ var UISwipeViewLight = (function (window, doc) {
       var that = this,
         i;
       this.options = {
-        height: null,
-        width: null,
+        height: 800,
+        width: 600,
         margin: 0,
         loop: true,
         slideSpeed: 250,
         swipe: true,
         index: 0,
         gesture: true,
-        doubleTap: false,
         preventDefaultTouchEvents: true,
         onBeforeSlide: null,
         onChangeView: null
@@ -91,15 +90,14 @@ var UISwipeViewLight = (function (window, doc) {
       this.isSliding = false;
       this.swipeThreshold = 50;
       this.swipeTimeThreshold = 250;
-      this.doubleTapSpeed = 250;
       this.startPoint = {
         x: 0,
         y: 0
       };
       this.el = document.createElement('div');
       this.el.className = 'swipeviewlight';
-      this.el.style.height = '100%';
-      this.el.style.width = '100%';
+      this.el.style.height = this.options.height + 'px';
+      this.el.style.width = this.options.width + 'px';
       this.el.style.position = 'relative';
       this.el.style.overflow = 'hidden';
       this.dom = {};
@@ -276,7 +274,6 @@ var UISwipeViewLight = (function (window, doc) {
       }
     },
     onTouch: function (action, point) {
-      //this.stopSlideshow();
       switch (action) {
       case START_EV:
         this.startPoint = point;
@@ -285,10 +282,6 @@ var UISwipeViewLight = (function (window, doc) {
       case 'swipeleft':
       case 'swiperight':
         this.slide(action);
-        break;
-      case 'tap':
-        break;
-      case 'doubletap':
         break;
       }
     },
@@ -368,8 +361,8 @@ var UISwipeViewLight = (function (window, doc) {
       this._unbind(END_EV);
       this._unbind(CANCEL_EV, window);
     },
-    _resize: function () {
-      //this.resetPosition();
+    _resize: function(){
+
     }
   };
 
@@ -380,8 +373,9 @@ var UISwipeViewLight = (function (window, doc) {
   }
   return SwipeViewLight;
 })(window, document);
+
 if (typeof define === 'function' && define.amd) {
   define(function () {
-    return SwipeViewLight;
+    return UISwipeViewLight;
   });
 }

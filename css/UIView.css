@@ -2,4 +2,12 @@
 
   .view { position: absolute; width: 100%; }
   .view-area {height: 100%; width: 100%; position: absolute; z-index: 1; top: 0; left: 0;}
-  .view-image { width: 100%; display: block; }
+  .view-image { width: 100%; display: block; -webkit-transform: scale3d(1,1,1);
+     -moz-transform: scale3d(1,1,1);
+      -ms-transform: scale3d(1,1,1);
+       -o-transform: scale3d(1,1,1);
+          transform: scale3d(1,1,1); }
+
+html, body { margin:0; padding:0; height:100%; width:100% }
+
+#wrapper { height: 100%; width: 100%; }
