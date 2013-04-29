@@ -130,6 +130,12 @@ var UISwipeViewLight = (function (window, doc) {
       this.enabled = false;
       this._unbind(START_EV);
     },
+    goTo: function(index){
+      if(!isNaN(index)) 
+        this.doSlide(Number(index));
+      else
+        throw 'UISwipeViewLight: Error, @index param no valid';
+    },
     prev: function () {
       this.doSlide(this.index - 1);
     },
@@ -231,7 +237,11 @@ var UISwipeViewLight = (function (window, doc) {
       if (this.lastIndex !== this.index) {
         this.options.onChangeView && this.options.onChangeView.call(this);
       }
-      this.getView(this.lastIndex).detach();
+      var lastView = this.getView(this.lastIndex);
+      if (lastView.detach)
+        lastView.detach();
+      else
+        throw 'SwipeViewLight: Error, detach method is required in UIView';
     },
     handleEvent: function (e) {
       switch (e.type) {
