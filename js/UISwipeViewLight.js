@@ -157,6 +157,20 @@ var UISwipeViewLight = (function (window, doc) {
     getView: function (index) {
       return this.views[index == undefined ? this.index : index];
     },
+    getNextView: function(){
+      var nextIndex = this.index + 1;
+      if ( nextIndex > this.views.length - 1) {
+        nextIndex = 0;
+      }
+      return this.getView(nextIndex)
+    },
+    getPrevView: function(){
+      var prevIndex = this.index - 1
+      if (prevIndex < 0) {
+        prevIndex = this.views.length - 1;
+      }
+      return this.getView(prevIndex);
+    },
     slide: function (action) {
       switch (action) {
       case 'swipeleft':
@@ -174,6 +188,10 @@ var UISwipeViewLight = (function (window, doc) {
         currentView = that.getView(that.index),
         xVal = this.dom.target.offsetWidth + this.options.margin,
         newView,
+        onTransitionEnd = function () {
+          newView.el.removeEventListener(TRNEND_EV, onTransitionEnd);
+          that.slideEnd();
+        },
         slideBy,
         style = {},
         style2 = {},
@@ -217,10 +235,7 @@ var UISwipeViewLight = (function (window, doc) {
           style[transitionDuration] = speed + 'ms';
           style[transitionTimingFunction] = 'ease-out';
           style[backfaceVisibility] = 'hidden';
-          newView.el.addEventListener(TRNEND_EV, function () {
-            newView.el.removeEventListener(TRNEND_EV, this);
-            that.slideEnd();
-          });
+          newView.el.addEventListener(TRNEND_EV, onTransitionEnd, false);
         }
         style[transform] = (has3d) ? 'translate3d(' + x * -1 + 'px, ' + y + 'px, 0px)' : 'translate(' + x * -1 + 'px, ' + y + 'px)';
         that._css(newView.el, style);
