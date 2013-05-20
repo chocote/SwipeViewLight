@@ -100,6 +100,8 @@ var UISwipeViewLight = (function (window, doc) {
       this.el.style.width = this.options.width + 'px';
       this.el.style.position = 'relative';
       this.el.style.overflow = 'hidden';
+      this.el.style[backfaceVisibility] = 'hidden';
+      
       this.dom = {};
       this.dom.target = target;
       this._bind(RESIZE_EV, window);
@@ -183,18 +185,23 @@ var UISwipeViewLight = (function (window, doc) {
       return;
     },
     doSlide: function (index, speed) {
+      
+      if (this.isSliding)
+        return;
+
+      this.isSliding = true;
+
       var that = this,
         speed = speed || this.options.slideSpeed,
         currentView = that.getView(that.index),
         xVal = this.dom.target.offsetWidth + this.options.margin,
         newView,
         onTransitionEnd = function () {
-          newView.el.removeEventListener(TRNEND_EV, onTransitionEnd);
+          this.removeEventListener(TRNEND_EV, onTransitionEnd);
           that.slideEnd();
         },
         slideBy,
         style = {},
-        style2 = {},
         x,
         y;
       if (this.index < index) {
@@ -219,44 +226,68 @@ var UISwipeViewLight = (function (window, doc) {
       } else {
         newView = that.getView(index);
       }
+      
       that.lastIndex = that.index;
+      
       that.index = index;
+      
       if (hasTransform) {
         that.el.appendChild(newView.render());
         x = xVal;
         y = 0;
-        style[transitionProperty] = 'all';
+        
+        
         style[transitionDelay] = '0';
+        style[transitionProperty] = 'all';
+        style[transitionTimingFunction] = '';
+        style[transitionDuration] = '0';
+        
         if (speed === 0) {
-          style[transitionDuration] = '';
-          style[transitionTimingFunction] = '';
           that.slideEnd();
         } else {
-          style[transitionDuration] = speed + 'ms';
-          style[transitionTimingFunction] = 'ease-out';
-          style[backfaceVisibility] = 'hidden';
           newView.el.addEventListener(TRNEND_EV, onTransitionEnd, false);
         }
-        style[transform] = (has3d) ? 'translate3d(' + x * -1 + 'px, ' + y + 'px, 0px)' : 'translate(' + x * -1 + 'px, ' + y + 'px)';
+        
+        style[transform] = (has3d) ? 
+            'translate3d(' + x * -1 + 'px, ' + y + 'px, 0px)' : 
+            'translate(' + x * -1 + 'px, ' + y + 'px)';
+
         that._css(newView.el, style);
+
         setTimeout(function () {
-          style[transform] = (has3d) ? 'translate3d(' + x + 'px, ' + y + 'px, 0px)' : 'translate(' + x + 'px, ' + y + 'px)';
+          
+          style[transitionDuration] = speed + 'ms';
+          style[transitionTimingFunction] = 'ease-out';
+
+          style[transform] = (has3d) ? 
+            'translate3d(' + x + 'px, ' + y + 'px, 0px)' : 
+            'translate(' + x + 'px, ' + y + 'px)';
+
           that._css(currentView.el, style);
-          style[transform] = (has3d) ? 'translate3d(0px, ' + y + 'px, 0px)' : 'translate(0px, ' + y + 'px)';
+          
+          style[transform] = (has3d) ? 
+          'translate3d(0px, ' + y + 'px, 0px)' : 
+          'translate(0px, ' + y + 'px)';
+          
           that._css(newView.el, style);
-        });
+
+        },0);
       }
     },
     slideEnd: function () {
+      var lastView = this.getView(this.lastIndex);
+      if (lastView.detach){
+        lastView.detach();
+        lastView.el.removeAttribute("style");
+      } else {
+        throw 'SwipeViewLight: Error, detach method is required in UIView';
+      }
+      
       this.isSliding = false;
+      
       if (this.lastIndex !== this.index) {
         this.options.onChangeView && this.options.onChangeView.call(this);
       }
-      var lastView = this.getView(this.lastIndex);
-      if (lastView.detach)
-        lastView.detach();
-      else
-        throw 'SwipeViewLight: Error, detach method is required in UIView';
     },
     handleEvent: function (e) {
       switch (e.type) {
