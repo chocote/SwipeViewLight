@@ -7,6 +7,7 @@
 
 var UISwipeViewLight = (function (window, doc) {
   var m = Math,
+    jQuery = window.jQuery,
     dummyStyle = doc.createElement('div').style,
     vendor = (function () {
       var vendors = 't,webkitT,MozT,msT,OT'.split(','),
@@ -230,12 +231,11 @@ var UISwipeViewLight = (function (window, doc) {
       that.lastIndex = that.index;
       
       that.index = index;
-      
+      that.el.appendChild(newView.render());
+      x = xVal;
+      y = 0;
+
       if (hasTransform) {
-        that.el.appendChild(newView.render());
-        x = xVal;
-        y = 0;
-        
         
         style[transitionDelay] = '0';
         style[transitionProperty] = 'all';
@@ -259,11 +259,11 @@ var UISwipeViewLight = (function (window, doc) {
           style[transitionDuration] = speed + 'ms';
           style[transitionTimingFunction] = 'ease-out';
 
-          style[transform] = (has3d) ? 
-            'translate3d(' + x + 'px, ' + y + 'px, 0px)' : 
-            'translate(' + x + 'px, ' + y + 'px)';
+          // style[transform] = (has3d) ? 
+          //   'translate3d(' + x + 'px, ' + y + 'px, 0px)' : 
+          //   'translate(' + x + 'px, ' + y + 'px)';
 
-          that._css(currentView.el, style);
+          // that._css(currentView.el, style);
           
           style[transform] = (has3d) ? 
           'translate3d(0px, ' + y + 'px, 0px)' : 
@@ -271,7 +271,16 @@ var UISwipeViewLight = (function (window, doc) {
           
           that._css(newView.el, style);
 
-        },0);
+        }, 10);
+      } else {
+
+        if (jQuery) {
+          that.el.appendChild(newView.render());
+          jQuery(currentView.el).animate({ left: x , top: y }, speed);
+          jQuery(newView.el).css({ left: x * -1 , top: y * -1 }).animate({ left: 0, top: y }, speed, function(){
+            that.slideEnd();
+          });
+        }
       }
     },
     slideEnd: function () {

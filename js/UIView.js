@@ -25,6 +25,8 @@ UIView.prototype = {
       this.dom.area = el.find('.view-area');
       this.el = el.get(0);
     }
+    if (this.loaded)
+      this.setImage(true);
     return this.el;
   },
 
