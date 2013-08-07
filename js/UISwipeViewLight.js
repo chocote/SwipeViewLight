@@ -7,7 +7,6 @@
 
 var UISwipeViewLight = (function (window, doc) {
   var m = Math,
-    jQuery = window.jQuery,
     dummyStyle = doc.createElement('div').style,
     vendor = (function () {
       var vendors = 't,webkitT,MozT,msT,OT'.split(','),
@@ -57,12 +56,12 @@ var UISwipeViewLight = (function (window, doc) {
       return transitionEnd[vendor];
     })(),
     nextFrame = (function () {
-      return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
-        return setTimeout(callback, 1);
+      return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
+        return setTimeout(callback, 1000/60);
       };
     })(),
     cancelFrame = (function () {
-      return window.cancelRequestAnimationFrame || window.webkitCancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.mozCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout;
+      return window.cancelRequestAnimationFrame || window.webkitCancelAnimationFrame || window.webkitCancelRequestAnimationFrame || window.oCancelRequestAnimationFrame || window.msCancelRequestAnimationFrame || clearTimeout;
     })(),
     // Helpers
     translateZ = has3d ? ' translateZ(0)' : '',
@@ -72,6 +71,7 @@ var UISwipeViewLight = (function (window, doc) {
       this.options = {
         height: 800,
         width: 600,
+        axis: 'x',
         margin: 0,
         loop: true,
         slideSpeed: 250,
@@ -177,9 +177,11 @@ var UISwipeViewLight = (function (window, doc) {
     slide: function (action) {
       switch (action) {
       case 'swipeleft':
+      case 'swipetop':
         this.next();
         break;
       case 'swiperight':
+      case 'swipebottom':
         this.prev();
         break;
       }
@@ -195,7 +197,6 @@ var UISwipeViewLight = (function (window, doc) {
       var that = this,
         speed = speed || this.options.slideSpeed,
         currentView = that.getView(that.index),
-        xVal = this.dom.target.offsetWidth + this.options.margin,
         newView,
         onTransitionEnd = function () {
           this.removeEventListener(TRNEND_EV, onTransitionEnd);
@@ -203,23 +204,34 @@ var UISwipeViewLight = (function (window, doc) {
         },
         slideBy,
         style = {},
-        x,
-        y;
+        xVal = 0,
+        yVal = 0,
+        x, y;
+
+      if (this.options.axis == 'x') {
+        xVal = this.dom.target.offsetWidth + this.options.margin;
+      } else {
+        yVal = this.dom.target.offsetHeight + this.options.margin;
+      }
+
       if (this.index < index) {
         xVal = xVal * -1; // swipeleft
+        yVal = yVal * -1;
       } else if (this.index > index) {
         xVal = xVal; // swiperight
+        yVal = yVal; 
       } else {
         return;
       }
-      if (xVal < 0) {
+      if (xVal < 0 || yVal < 0 ) {
         this.lastSlideByAction = 'next';
-      } else if (xVal > 0) {
+      } else if (xVal > 0 || yVal > 0) {
         this.lastSlideByAction = 'prev';
       } else {
         this.lastSlideByAction = 'current';
       }
-      if (this.lastSlideByAction != 'current') this.options.onBeforeSlide && this.options.onBeforeSlide.call(this);
+      if (this.lastSlideByAction != 'current') 
+        this.options.onBeforeSlide && this.options.onBeforeSlide.call(this);
       if (index == that.views.length) {
         newView = that.getView(index = 0);
       } else if (index == -1) {
@@ -231,16 +243,18 @@ var UISwipeViewLight = (function (window, doc) {
       that.lastIndex = that.index;
       
       that.index = index;
-      that.el.appendChild(newView.render());
-      x = xVal;
-      y = 0;
-
+      
       if (hasTransform) {
         
-        style[transitionDelay] = '0';
+        that.el.appendChild(newView.render());
+        
+        x = xVal;
+        y = yVal;
+        
+        style[transitionDelay] = '0s';
         style[transitionProperty] = 'all';
         style[transitionTimingFunction] = '';
-        style[transitionDuration] = '0';
+        style[transitionDuration] = '0s';
         
         if (speed === 0) {
           that.slideEnd();
@@ -249,38 +263,29 @@ var UISwipeViewLight = (function (window, doc) {
         }
         
         style[transform] = (has3d) ? 
-            'translate3d(' + x * -1 + 'px, ' + y + 'px, 0px)' : 
-            'translate(' + x * -1 + 'px, ' + y + 'px)';
+            'translate3d(' + x * -1 + 'px, ' + y*-1 + 'px, 0)' : 
+            'translate(' + x * -1 + 'px, ' + y*-1 + 'px)';
 
         that._css(newView.el, style);
 
         setTimeout(function () {
           
           style[transitionDuration] = speed + 'ms';
-          style[transitionTimingFunction] = 'ease-out';
+          style[transitionTimingFunction] = 'cubic-bezier(0,0,0.25,1)';
 
-          // style[transform] = (has3d) ? 
-          //   'translate3d(' + x + 'px, ' + y + 'px, 0px)' : 
-          //   'translate(' + x + 'px, ' + y + 'px)';
+          style[transform] = (has3d) ? 
+            'translate3d(' + x + 'px, ' + y + 'px, 0)' : 
+            'translate(' + x + 'px, ' + y + 'px)';
 
-          // that._css(currentView.el, style);
+          that._css(currentView.el, style);
           
           style[transform] = (has3d) ? 
-          'translate3d(0px, ' + y + 'px, 0px)' : 
-          'translate(0px, ' + y + 'px)';
+          'translate3d(0, 0, 0)' : 
+          'translate(0, 0)';
           
           that._css(newView.el, style);
 
-        }, 10);
-      } else {
-
-        if (jQuery) {
-          that.el.appendChild(newView.render());
-          jQuery(currentView.el).animate({ left: x , top: y }, speed);
-          jQuery(newView.el).css({ left: x * -1 , top: y * -1 }).animate({ left: 0, top: y }, speed, function(){
-            that.slideEnd();
-          });
-        }
+        },25);
       }
     },
     slideEnd: function () {
@@ -335,8 +340,12 @@ var UISwipeViewLight = (function (window, doc) {
         diffTime = endTime - this.touchStartTime;
         // See if there was a swipe gesture
         if (diffTime <= this.swipeTimeThreshold) {
-          if (window.Math.abs(distX) >= this.swipeThreshold) {
+          if (window.Math.abs(distX) >= this.swipeThreshold && this.options.axis == 'x') {
             this.onTouch((distX < 0) ? 'swipeleft' : 'swiperight', this.endPoint);
+            return;
+          }
+          if (window.Math.abs(distY) >= this.swipeThreshold && this.options.axis == 'y') {
+            this.onTouch((distY < 0) ? 'swipetop' : 'swipebottom', this.endPoint);
             return;
           }
         }
@@ -350,6 +359,8 @@ var UISwipeViewLight = (function (window, doc) {
       case 'touchmoveend':
       case 'swipeleft':
       case 'swiperight':
+      case 'swipetop':
+      case 'swipebottom':
         this.slide(action);
         break;
       }

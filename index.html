@@ -65,6 +65,8 @@
           uiSwipeView = new UISwipeViewLight(target.get(0), views, {
             height: maxWidth * ratio,
             width: maxWidth,
+            axis: 'x',
+            slideSpeed:350,
             onChangeView: _changeView,
             onBeforeSlide: _beforeSlide
           });
