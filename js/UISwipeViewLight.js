@@ -8,7 +8,7 @@
 
 
 
-   Events = (function() {
+   var Events = (function() {
 
      var ArrayProto = Array.prototype,
        ObjProto = Object.prototype,
@@ -511,7 +511,6 @@
 
          addEvt(newView.el, TRNEND_EV, function _transitionEnd() {
            rmEvt(this, _transitionEnd, false);
-           _transitionEnd = null;
            that.slideEnd();
          }, false);
 
