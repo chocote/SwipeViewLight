@@ -1,0 +1,24 @@
+{
+  "name": "swipeviewlight",
+  "version": "1.0.0",
+  "description": "Full Object Oriented Gallery",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:scripts": "browserify -e ./src/main.js -s app -o ./dist/build.js",
+    "build:one": "browserify -e ./src/swipeviewlight.js -o ./dist/swipeview.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osobrevilla/SwipeViewLight.git"
+  },
+  "author": "Oscar Sobrevilla",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/osobrevilla/SwipeViewLight/issues"
+  },
+  "homepage": "https://github.com/osobrevilla/SwipeViewLight#readme",
+  "dependencies": {
+    "jquery": "^2.2.3"
+  }
+}
