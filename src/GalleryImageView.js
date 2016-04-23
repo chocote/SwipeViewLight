@@ -3,8 +3,9 @@ var CDImage = require('./cdimage');
 var Events = require('./events');
 
 function Spinner() {
-  this.$el = $('<div class="progress-ring"></div>');
-  this.el = this.$el.get(0);
+  this.el = document.createElement('div');
+  this.el.className = 'progress-ring';
+  this.$el = $(this.el);
 }
 
 $.extend(Spinner.prototype, Events, {
