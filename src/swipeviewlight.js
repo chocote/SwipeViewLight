@@ -358,15 +358,12 @@ var SwipeViewLight = (function(window, document) {
                     that.slideEnd();
                 }, false);
 
-                setTimeout(function() {
-                    nextFrame(function() {
-                        that._css(currentView.el, style);
-                        style[transform] = (has3d) ?
-                            'translate3d(0, 0, 0)' :
-                            'translate(0, 0)';
-                        that._css(newView.el, style);
-                    });
-                }, 1);
+                newView.el.offsetHeight;
+                that._css(currentView.el, style);
+                style[transform] = (has3d) ?
+                    'translate3d(0, 0, 0)' :
+                    'translate(0, 0)';
+                that._css(newView.el, style);
 
             } else if (window.jQuery && speed > 0) {
 

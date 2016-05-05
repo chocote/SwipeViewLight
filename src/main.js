@@ -1,66 +1,59 @@
 var MediaGallery = require('./mediagallery');
 var $ = require('jquery');
-var app = {
+const BASE_URL = window.location.protocol + '//' + location.host + location.pathname.replace(/\/+$/, '');
+const HAS_HISTORY_API =  typeof history.pushState == 'function';
+const REG_GET_PAGE = new RegExp(BASE_URL + "\\/(\\d+)");
 
-  baseURL: 'http://' + location.host + location.pathname.replace(/\/+$/, ''),
+var app = {
 
   init: function() {
 
-    app.lastPage = app.getURLPage();
+    app.lastPage = app.getPageNumFromURL();
 
     app.gallery = new MediaGallery(data.pages, {
       index: 0
-    });
-
-    $('body').append(app.gallery.$el);
-
-    app.gallery.on('next', function() {
-      if (this.swipeView.isSliding)
-        return
-      if (typeof history.pushState == 'function') {
-        var newURL = app.baseURL + '/' + (this.swipeView.views.length - 1 === this.swipeView.index ? 1 : this.swipeView.index + 2);
-        history.pushState(null, '', newURL);
-        app.dispatch();
-      } else {
-        this.swipeView.next();
-      }
-    });
-
-    app.gallery.on('prev', function() {
-      if (this.swipeView.isSliding)
-        return
-      if (typeof history.pushState == 'function') {
-        var newURL = app.baseURL + '/' + (this.swipeView.index === 0 ? this.swipeView.views.length : this.swipeView.index);
-        history.pushState(null, '', newURL);
-        app.dispatch();
-      } else {
-        this.swipeView.prev();
-      }
-    });
+    })
+      .on('next', app.next, app)
+      .on('prev', app.prev, app)
 
     $(window).off('popstate').on('popstate', app.dispatch);
-
+    $(document.body).append(app.gallery.$el);
+    
     app.gallery.render();
   },
-  getURLPage: function() {
-    var page, out = (new RegExp(app.baseURL + "\\/(\\d+)")).exec(window.location);
-    if (out === null) {
-      page = 1;
-    } else {
-      page = parseInt(out[1]);
-    }
-    return page;
+  getPageNumFromURL: function() {
+    var matched = (REG_GET_PAGE).exec(window.location);
+    return matched === null ? 1 : parseInt(matched[1]);
   },
   dispatch: function() {
-    app.lastPage = app.getURLPage();
-    if (this.gallery.swipeView.isSliding) {
-      this.gallery.off('changePage', this.go).on('changePage', this.go);
+    app.lastPage = app.getPageNumFromURL();
+    app.gallery.swipeView.goTo(app.lastPage - 1);
+  },
+  next: function() {
+    var swipeView = app.gallery.swipeView,
+      newURL;
+    if (swipeView.isSliding)
+      return
+    if (HAS_HISTORY_API) {
+      newURL = BASE_URL + '/' + (swipeView.views.length - 1 === swipeView.index ? 1 : swipeView.index + 2);
+      history.pushState(null, '', newURL);
+      app.dispatch();
     } else {
-      go();
+      swipeView.next();
     }
   },
-  go: function() {
-    gallery.swipeView.goTo(app.lastPage - 1);
+  prev: function() {
+    var swipeView = app.gallery.swipeView,
+      newURL;
+    if (swipeView.isSliding)
+      return
+    if (HAS_HISTORY_API) {
+      newURL = BASE_URL + '/' + (swipeView.index === 0 ? swipeView.views.length : swipeView.index);
+      history.pushState(null, '', newURL);
+      app.dispatch();
+    } else {
+      swipeView.prev();
+    }
   }
 };
 

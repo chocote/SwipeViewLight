@@ -130,7 +130,9 @@ $.extend(GalleryImageView.prototype, Events, {
     this.$el.append(this.spinner.el);
   },
   hideSpinner: function() {
-    this.spinner.$el.detach();
+    this.spinner.$el.fadeOut(function(){
+      this.spinner.$el.detach();
+    }.bind(this))
   },
   detach: function() {
     this.$el.detach();

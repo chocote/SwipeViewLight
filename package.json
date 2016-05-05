@@ -20,5 +20,8 @@
   "homepage": "https://github.com/osobrevilla/SwipeViewLight#readme",
   "dependencies": {
     "jquery": "^2.2.3"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.0"
   }
 }
